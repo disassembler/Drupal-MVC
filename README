@@ -1,0 +1,24 @@
+To use this module:
+
+git clone git://github.com/disassembler/Drupal-MVC.git <drupal_dir>/sites/<yoursite>/modules/mvc
+
+Enable mvc module in drupal
+
+add a hook to your current module you want to add mvc functionality for like so:
+
+{{{
+/**
+ * Implementation of hook_mvc_app().
+ */
+function <module>_mvc_app() {
+    $mvc = new ArrayObject();
+    $mvc['base'] = '<url_path>';
+    $mvc['path'] = drupal_get_path('module','<module>');
+    return $mvc;
+
+}
+}}}
+
+Create directories for controller, models and views
+
+To see an example of how this works, a HelloController with it's view exist in the module itself
