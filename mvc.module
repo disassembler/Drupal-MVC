@@ -15,21 +15,22 @@
  * This module allows creating mvc applications from within drupal
  *
  */
- /**
-  * Instantiate class autoloader
-  */
+
+/**
+ * Instantiate class autoloader
+ */
 module_load_include('inc', 'mvc', 'autoload');
 
 /**
  * Implementation of hook_init().
  */
 function mvc_init() {
-	global $mvc_modules;
-	$mvc_modules = module_invoke_all('mvc_app');
-	foreach($mvc_modules as $mod) {
-		AutoLoader::addPath($mod['path']);
-	}
-	AutoLoader::addPath(drupal_get_path('module','mvc'));
+  global $mvc_modules;
+  $mvc_modules = module_invoke_all('mvc_app');
+  foreach($mvc_modules as $mod) {
+    AutoLoader::addPath($mod['path']);
+  }
+  AutoLoader::addPath(drupal_get_path('module','mvc'));
 }
 
 
@@ -53,18 +54,18 @@ function mvc_init() {
  * Implementation of hook_menu().
  */
 function mvc_menu() {
-	global $mvc_modules;
-    $items = array();
-    // Graduate Application Page
-	foreach($mvc_modules as $mod) {
-		$items[ $mod['base'].'/%/%'] = array(
-			'page callback' => 'mvc_controller',
-			'page arguments' => array($mod['path']),
-			'access callback' => TRUE,
-			'type' => MENU_CALLBACK
-		);
-	}
-    return $items;
+  global $mvc_modules;
+  $items = array();
+  // Graduate Application Page
+  foreach($mvc_modules as $mod) {
+    $items[ $mod['base'].'/%/%'] = array(
+      'page callback' => 'mvc_controller',
+      'page arguments' => array($mod['path']),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK
+    );
+  }
+  return $items;
 }
 
 /**
@@ -72,22 +73,22 @@ function mvc_menu() {
  * @return object View rendered by controller
  */
 function mvc_controller($modpath) {
-	global $controllerName, $method, $module_path;
-	$module_path = $modpath;
-	$controllerName = arg(1);
-	$fullControllerName = $controllerName.'Controller';
-	$method = arg(2);
-	$params = array_merge(array_diff(arg(),array(arg(0),arg(1),arg(2))));
-	$controller = new $fullControllerName;
-	if($controller->access()) {
-		if(method_exists($controller, $method)) {
-			return $controller->$method($params);
-		}
-		else {
-			drupal_not_found();
-		}
-	}
-	else {
-		drupal_access_denied();
-	}
+  global $controllerName, $method, $module_path;
+  $module_path = $modpath;
+  $controllerName = arg(1);
+  $fullControllerName = $controllerName.'Controller';
+  $method = arg(2);
+  $params = array_merge(array_diff(arg(),array(arg(0),arg(1),arg(2))));
+  $controller = new $fullControllerName;
+  if($controller->access()) {
+    if(method_exists($controller, $method)) {
+      return $controller->$method($params);
+    }
+    else {
+      drupal_not_found();
+    }
+  }
+  else {
+    drupal_access_denied();
+  }
 }
