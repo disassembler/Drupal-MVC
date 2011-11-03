@@ -16,11 +16,6 @@ class AutoLoader {
 			}
 
 		}
-    /** 
-     * Since we override drupal's autoloader, make sure we
-     * hand it off to drupal if nothing is found.
-		 */
-		return _registry_check_code('class', $class);
 	}
 	public static function addPath($path) {
 		$path = realpath($path);
