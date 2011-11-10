@@ -42,6 +42,20 @@ function mvc_init() {
  * 	$mvc = new ArrayObject();
  * 	$mvc['base'] = 'mvc';
  * 	$mvc['path'] = drupal_get_path('module','mvc');
+ * 	$mvc['blocks'] = array(array(
+ * 	  'name' => 'Block Name',
+ * 	  'title' => 'Block Title',
+ * 	  'controller' => 'controller',
+ * 	  'method' => 'method',
+ * 	  'args' => array('arg1','arg2'),
+ * 	  ));
+ * 	$mvc['menu_items'] = array(array(
+ * 	  'path' => 'path/to/wherever',
+ * 	  'title' => 'Menu Title',
+ * 	  'controller' => 'controller',
+ * 	  'method' => 'method',
+ * 	  'args' => array('arg1','arg2'),
+ * 	));
  * 	return $mvc;
  * }
  * }}}
@@ -60,35 +74,131 @@ function mvc_menu() {
   foreach($mvc_modules as $mod) {
     $items[ $mod['base'].'/%/%'] = array(
       'page callback' => 'mvc_controller',
-      'page arguments' => array($mod['path']),
+      'page arguments' => array($mod['path'],$mod['base']),
       'access callback' => TRUE,
       'type' => MENU_CALLBACK
     );
+    foreach($mod['menu_items'] as $menu) {
+      if(!isset($menu['args'])) {
+        $menu['args'] = NULL;
+      }
+      if(!isset($menu['controller'])) {
+        $menu['controller'] = NULL;
+      }
+      if(!isset($menu['controller'])) {
+        $menu['method'] = NULL;
+      }
+      $items[$menu['path']] = array(
+        'title' => $menu['title'],
+        'page callback' => 'mvc_controller',
+        'page arguments' => array($mod['path'],NULL,$menu['path'],$menu['controller'],$menu['method'],$menu['args']),
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM
+      );
+    }
   }
+  dpm($items);
   return $items;
+}
+/**
+ * Implements hook_block_info()
+ */
+function mvc_block_info() {
+  global $mvc_modules;
+  foreach($mvc_modules as $mod) {
+    foreach($mod['blocks'] as $block) {
+      $blocks[$block['name']] = array(
+        'info' => $block['title'],
+        'cache' => DRUPAL_NO_CACHE
+      );
+    }
+  }
+  return $blocks;
+}
+/**
+ * Implements hook_block_view()
+ */
+function mvc_block_view($delta = '') {
+  global $mvc_modules;
+  $block = array();
+
+  foreach($mvc_modules as $mod) {
+    foreach($mod['blocks'] as $block) {
+      switch ($delta) {
+      case $block['name']:
+        $block['subject'] = $block['title'];
+        $block['content'] = mvc_controller($mod['path'],NULL,NULL,$block['controller'],$block['method'],$block['args']);
+        break;
+      }
+    }
+  }
+  return $block;
 }
 
 /**
  * dispatcher function for controller
  * @return object View rendered by controller
  */
-function mvc_controller($modpath) {
+function mvc_controller($modpath,$base,$menu_path = NULL,$pass_controller = NULL,$pass_method = NULL, $pass_args = NULL) {
   global $controllerName, $method, $module_path;
+  /**
+   * If `pass_controller` is not set, evaluate from args()
+   * Otherwise, `controllerName` is what is passed as a parameter
+   */
   $module_path = $modpath;
-  $controllerName = arg(1);
+  if(!$pass_controller) {
+    $controllerName = arg(1);
+  }
+  else {
+    $controllerName = $pass_controller;
+  }
   $fullControllerName = $controllerName.'Controller';
-  $method = arg(2);
-  $params = array_merge(array_diff(arg(),array(arg(0),arg(1),arg(2))));
-  $controller = new $fullControllerName;
-  if($controller->access()) {
-    if(method_exists($controller, $method)) {
-      return $controller->$method($params);
+  /** 
+   * If `pass_method` is not set, set to 2nd argument
+   * Otherwise, `method` is what is passed as a parameter
+   */
+  if(!$pass_method) {
+    $method = arg(2);
+  }
+  else {
+    $method = $pass_method;
+  }
+  /**
+   * If `pass_args` is not set, set to remaining arguments
+   * Otherwise, `params` is what is passed as parameter
+   */
+  if(!$pass_args) {
+    $args = arg();
+    if(!$menu_path) {
+      $exp_args = array($controllerName,$method,$base);
+      dpm($exp_args);
     }
     else {
-      drupal_not_found();
+      $exp_args = explode('/',$menu_path);
+    }
+    $diff = array_diff($args,$exp_args);
+    $params = array_merge($diff);
+  }
+  else {
+    $params = $pass_args;
+  }
+
+  if(class_exists($fullControllerName)) {
+    $controller = new $fullControllerName;
+    if($controller->access()) {
+      if(method_exists($controller, $method)) {
+        return $controller->$method($params);
+      }
+      else {
+        drupal_not_found();
+      }
+    }
+    else {
+      drupal_access_denied();
     }
   }
   else {
-    drupal_access_denied();
+    drupal_not_found();
   }
 }
+?>
