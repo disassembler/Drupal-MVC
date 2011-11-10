@@ -11,7 +11,7 @@ add a hook to your current module you want to add mvc functionality for like so:
  */
 function module_mvc_app() {
   $mvc = new ArrayObject();
-  $mvc['base'] = 'README';
+  $mvc['base'] = 'base';
   $mvc['path'] = drupal_get_path('module','README');
   $mvc['blocks'] = array(array(
     'name' => 'myblock',
