@@ -5,17 +5,29 @@ git clone git://github.com/disassembler/Drupal-MVC.git <drupal_dir>/sites/<yours
 Enable mvc module in drupal
 
 add a hook to your current module you want to add mvc functionality for like so:
-
 {{{
 /**
- * Implementation of hook_mvc_app().
+ * Implements hook_mvc_app()
  */
-function <module>_mvc_app() {
-    $mvc = new ArrayObject();
-    $mvc['base'] = '<url_path>';
-    $mvc['path'] = drupal_get_path('module','<module>');
-    return $mvc;
-
+function module_mvc_app() {
+  $mvc = new ArrayObject();
+  $mvc['base'] = 'README';
+  $mvc['path'] = drupal_get_path('module','README');
+  $mvc['blocks'] = array(array(
+    'name' => 'myblock',
+    'title' => 'Block Title',
+    'controller' => 'controller',
+    'method' => 'method',
+    'args' => array('arg1','arg2'),
+    ));
+  $mvc['menu_items'] = array(array(
+    'path' => 'menu/path',
+    'title' => 'My Menu Item',
+    'controller' => 'controller',
+    'method' => 'method',
+    'args' => array('arg1'),
+  ));
+  return $mvc;
 }
 }}}
 
