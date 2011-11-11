@@ -75,6 +75,7 @@ function mvc_menu() {
     $items[ $mod['base'].'/%/%'] = array(
       'page callback' => 'mvc_controller',
       'page arguments' => array($mod['path'],$mod['base']),
+      'page arguments' => array($mod['path'],$mod['base'],NULL,NULL,NULL),
       'access callback' => TRUE,
       'type' => MENU_CALLBACK
     );
@@ -109,6 +110,8 @@ function mvc_block_info() {
     foreach($mod['blocks'] as $block) {
       $blocks[$block['name']] = array(
         'info' => $block['title'],
+        'region' => $block['region'],
+        'pages' => $block['pages'],
         'cache' => DRUPAL_NO_CACHE
       );
     }
