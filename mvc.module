@@ -107,13 +107,18 @@ function mvc_menu() {
 function mvc_block_info() {
   global $mvc_modules;
   foreach($mvc_modules as $mod) {
-    foreach($mod['blocks'] as $block) {
-      $blocks[$block['name']] = array(
-        'info' => $block['title'],
-        'region' => $block['region'],
-        'pages' => $block['pages'],
-        'cache' => DRUPAL_NO_CACHE
-      );
+    if(!empty($mod['blocks'])) {
+      foreach($mod['blocks'] as $block) {
+        $blocks[$block['name']] = array();
+        $blocks[$block['name']]['info'] = $block['title'];
+        if(!empty($block['region'])) {
+          $blocks[$block['name']]['region'] = $block['region'];
+        }
+        if(!empty($block['pages'])) {
+          $blocks[$block['name']]['pages'] = $block['pages'];
+        }
+        $blocks[$block['name']]['cache'] = DRUPAL_NO_CACHE;
+      }
     }
   }
   return $blocks;
@@ -126,12 +131,14 @@ function mvc_block_view($delta = '') {
   $block = array();
 
   foreach($mvc_modules as $mod) {
-    foreach($mod['blocks'] as $block) {
-      switch ($delta) {
-      case $block['name']:
-        $block['subject'] = $block['title'];
-        $block['content'] = mvc_controller($mod['path'],NULL,NULL,$block['controller'],$block['method'],$block['args']);
-        break;
+    if(!empty($mod['blocks'])) {
+      foreach($mod['blocks'] as $block) {
+        switch ($delta) {
+        case $block['name']:
+          $block['subject'] = $block['title'];
+          $block['content'] = mvc_controller($mod['path'],NULL,NULL,$block['controller'],$block['method'],$block['args']);
+          break;
+        }
       }
     }
   }
@@ -185,7 +192,6 @@ function mvc_controller($modpath,$base,$menu_path = NULL,$pass_controller = NULL
   else {
     $params = $pass_args;
   }
-
   if(class_exists($fullControllerName)) {
     $controller = new $fullControllerName;
     if($controller->access()) {
