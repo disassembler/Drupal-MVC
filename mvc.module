@@ -69,54 +69,60 @@ function mvc_init() {
  */
 function mvc_menu() {
   global $mvc_modules;
-  $items = array();
-  // Graduate Application Page
-  foreach($mvc_modules as $mod) {
-    $items[ $mod['base'].'/%/%'] = array(
-      'page callback' => 'mvc_controller',
-      'page arguments' => array($mod['path'],$mod['base']),
-      'page arguments' => array($mod['path'],$mod['base'],NULL,NULL,NULL,NULL),
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK
-    );
-    foreach($mod['menu_items'] as $menu) {
-      if(!isset($menu['args'])) {
-        $menu['args'] = NULL;
-      }
-      if(!isset($menu['controller'])) {
-        $menu['controller'] = NULL;
-      }
-      if(!isset($menu['controller'])) {
-        $menu['method'] = NULL;
-      }
-      $items[$menu['path']] = array(
-        'title' => $menu['title'],
+  if(!empty($mvc_modules)) {
+    $items = array();
+    // Graduate Application Page
+    foreach($mvc_modules as $mod) {
+      $items[ $mod['base'].'/%/%'] = array(
         'page callback' => 'mvc_controller',
-        'page arguments' => array($mod['path'],NULL,$menu['path'],$menu['controller'],$menu['method'],$menu['args']),
+        'page arguments' => array($mod['path'],$mod['base']),
+        'page arguments' => array($mod['path'],$mod['base'],NULL,NULL,NULL,NULL),
         'access callback' => TRUE,
-        'type' => MENU_NORMAL_ITEM
+        'type' => MENU_CALLBACK
       );
+      foreach($mod['menu_items'] as $menu) {
+        if(!isset($menu['args'])) {
+          $menu['args'] = NULL;
+        }
+        if(!isset($menu['controller'])) {
+          $menu['controller'] = NULL;
+        }
+        if(!isset($menu['controller'])) {
+          $menu['method'] = NULL;
+        }
+        $items[$menu['path']] = array(
+          'title' => $menu['title'],
+          'page callback' => 'mvc_controller',
+          'page arguments' => array($mod['path'],NULL,$menu['path'],$menu['controller'],$menu['method'],$menu['args']),
+          'access callback' => TRUE,
+          'type' => MENU_NORMAL_ITEM
+        );
+      }
     }
+    return $items;
   }
-  return $items;
+  return array();
 }
 /**
  * Implements hook_block_info()
  */
 function mvc_block_info() {
+  $blocks = array();
   global $mvc_modules;
-  foreach($mvc_modules as $mod) {
-    if(!empty($mod['blocks'])) {
-      foreach($mod['blocks'] as $block) {
-        $blocks[$block['name']] = array();
-        $blocks[$block['name']]['info'] = $block['title'];
-        if(!empty($block['region'])) {
-          $blocks[$block['name']]['region'] = $block['region'];
+  if(!empty($mvc_modules)) {
+    foreach($mvc_modules as $mod) {
+      if(!empty($mod['blocks'])) {
+        foreach($mod['blocks'] as $block) {
+          $blocks[$block['name']] = array();
+          $blocks[$block['name']]['info'] = $block['title'];
+          if(!empty($block['region'])) {
+            $blocks[$block['name']]['region'] = $block['region'];
+          }
+          if(!empty($block['pages'])) {
+            $blocks[$block['name']]['pages'] = $block['pages'];
+          }
+          $blocks[$block['name']]['cache'] = DRUPAL_NO_CACHE;
         }
-        if(!empty($block['pages'])) {
-          $blocks[$block['name']]['pages'] = $block['pages'];
-        }
-        $blocks[$block['name']]['cache'] = DRUPAL_NO_CACHE;
       }
     }
   }
