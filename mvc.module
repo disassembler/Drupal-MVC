@@ -1,20 +1,15 @@
 <?php
 /**
- * @author Samuel Leathers
- * @copyright Copyright (c) 2011, The Pennsylvania State University
- * version 0.1
- * mvc.module
+ * @file
+ * Druapl MVC Framework
  *
- * @package mvc
- */
-
-
-// $Id$
-
-/**
  * This module allows creating mvc applications from within drupal
  *
- */
+ * @author Samuel Leathers <sbl5007@psu.edu>
+ * @version 7.x-0.1
+ * @copyright Samuel Leathers <sbl5007@psu.edu>, 18 November, 2011
+ * @package mvc
+ **/
 
 /**
  * Instantiate class autoloader
@@ -151,9 +146,13 @@ function mvc_block_view($delta = '') {
 }
 
 /**
+ * MVC Dispatch Function
+ *
  * dispatcher function for controller
+ *
  * @return object View rendered by controller
- */
+ * @author Samuel Leathers <sbl5007@psu.edu>
+ **/
 function mvc_controller($modpath,$base,$menu_path = NULL,$pass_controller = NULL,$pass_method = NULL, $pass_args = NULL) {
   global $controllerName, $method, $module_path;
   /**
